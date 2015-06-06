@@ -20,6 +20,8 @@ if (array_key_exists('boolGUI', $_POST)){
 //$plot1 = 1;
 //$plot2 = 2;
 //$period = 3;
+//$gui = 2;
+
 if ($plot1 == 0){
 	$plot1 = $plot2;
 }
@@ -139,11 +141,9 @@ fclose($gfh);
 
 if ($platform == "windows"){
 	exec("del wetter*.png");
-	exec("del rot*wetter*.png");
 	exec("C:\\\"Program Files (x86)\"\\gnuplot\\bin\\gnuplot $workPath$gnufile");
 }else{
 	exec("rm wetter*.png");
-	exec("rm rot*wetter*.png");
 	exec("gnuplot $gnufile");
 }
 
@@ -152,14 +152,6 @@ if ($gui == 1){
 	header("Content-type: image/png");
 	echo $img_data;
 }else{
-	if ($gui == 2) {
-		$image = imagecreatefrompng($imagefile);
-		$rotatedImageCW = imagerotate($image, -90, 0);
-		$rotatedImageCCW = imagerotate($image, 90, 0);
-		imagepng($rotatedImageCW, "rotCW_".$imagefile);
-		imagepng($rotatedImageCCW, "rotCCW_".$imagefile);
-	}
-	//echo "$workPath$gnufile\n";
 	echo "<?xml version=\"1.0\" encoding=\"iso-8859-1\" ?><gnuplot><![CDATA[$imagefile]]></gnuplot>";
 }
 
