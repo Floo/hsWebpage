@@ -212,17 +212,33 @@
 						<input type="button" class="button_2" onclick="window.open('logfile.php', 'Zweitfenster')" value="Logfile anzeigen" name="btnLogfile" />
 					</td>
 				</tr>
-				<tr height="30"></tr>
+				
 				<tr>
 					<td colspan="4">
 						<div class="beschr_2"><i>App downloaden:</i></div>
 					</td>
 				</tr>
-				<tr height="140">
+				<tr height="10"></tr>
+				<tr>
+					<td width="18"></td>
+					<td width="100">
+						<div class="beschr_3"><i>Meth9</i></div>
+					</td>
+					<td width="18"></td>
+					<td colspan="4">
+						<div class="beschr_3"><i>RaspiDAC</i></div>
+					</td>
+				</tr>
+				<tr height="100">
+					<td width="18"></td>
+					<td width="100">
+						<!-- QR-Code erzeugen mit: http://goqr.me/de/ color: "5D7E7E"-->
+						<img id="QRDownload" width="100" height="100" border="0" src="qrcode_Meth9.png"></img>
+					</td>
 					<td width="18"></td>
 					<td colspan="4">
 						<!-- QR-Code erzeugen mit: http://goqr.me/de/ color: "5D7E7E"-->
-						<img id="QRDownload" width="140" height="140" border="0" src="qrcode.png"></img>
+						<img id="QRDownload" width="100" height="100" border="0" src="qrcode_RaspiDAC.png"></img>
 					</td>
 				</tr>
 			</table>		
