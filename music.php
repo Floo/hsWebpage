@@ -1,9 +1,15 @@
 <?php
+	$post = $_POST;
+	$post = [
+		"endpoint" => "pm8000",
+		"cmd" => "set pm8000 mute",
+		"repeat" => "",
+	];
 
-	if ($_POST['endpoint'] != 'tv') {
-		if (!isset($_SESSION['raspip']) || !isset($_SESSION['raspport']) {
-			// Über UDP-Broadcast die IP und den Port des RaspiDAC ermitteln
-			// TODO: Port und IP des RaspiDAC über Session-Variable merken
+	if ($post['endpoint'] != 'tv') {
+		if (!isset($_SESSION['raspip']) || !isset($_SESSION['raspport'])) {
+			// ï¿½ber UDP-Broadcast die IP und den Port des RaspiDAC ermitteln
+			// TODO: Port und IP des RaspiDAC ï¿½ber Session-Variable merken
 			$ip = "255.255.255.255";
 			$sendport = 8002;
 			$recvport = 8001;
@@ -12,15 +18,14 @@
 			$udpsock = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP); 
 			socket_set_option($udpsock, SOL_SOCKET, SO_BROADCAST, 1);
 			socket_set_option($udpsock, SOL_SOCKET, SO_RCVTIMEO, array("sec"=>5, "usec"=>0));
+			socket_bind($udpsock, "0.0.0.0", $recvport);
 			socket_sendto($udpsock, $str, strlen($str), 0, $ip, $sendport);
-			
-			socket_bind($udpsock, '127.0.0.1', $recvport);
-			
+
 			while(true) {
 				$ret = @socket_recvfrom($udpsock, $buf, 1024, MSG_WAITALL, $raspip, $senderport);
 				if ($ret === false) break;
 				if (strpos($buf, '[RaspiDAC]') !== false) {
-					str_replace('[RaspiDAC]', '', $buf);
+					$buf = str_replace('[RaspiDAC]', '', $buf);
 					$strlist = explode(';', $buf);
 					$raspport = $strlist[5];
 					$_SESSION['raspport'] = $raspport;
@@ -39,11 +44,12 @@
 		//Kommando senden
 		$tcpsock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		socket_connect($tcpsock, $raspip, $raspport);
-		socket_write($stcpsock, $_POST['cmd'], strlen($_POST['cmd']));
-		// ggf. mehrmals senden (z.B. für Lautstärke)
-		if ($_POST['repeat'] > 1) $count = $_POST['repeat'];
+		socket_write($tcpsock, $post['cmd'], strlen($post['cmd']));
+		// ggf. mehrmals senden (z.B. fï¿½r Lautstï¿½rke)
+		$count = 1;
+		if ($post['repeat'] > 1) $count = $post['repeat'];
 		for ($i = 0; $i < $count; $i++) {
-			socket_write($stcpsock, $_POST['cmd'], strlen($_POST['cmd']));
+			socket_write($tcpsock, $post['cmd'], strlen($post['cmd']));
 		}
 		
 		//Antwort empfangen
