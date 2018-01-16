@@ -1,9 +1,13 @@
 <?php
+	require __DIR__ . '/panasonic_viera/RemoteControl.php';
+	require __DIR__ . '/vendor/autoload.php';
+	use Clue\QDataStream\Writer;
+
 	$post = $_POST;
 	$post = [
-		"endpoint" => "pm8000",
-		"cmd" => "set pm8000 mute",
-		"repeat" => "",
+		"endpoint" => "tv",
+		"cmd" => "set mute",
+		//"repeat" => "2",
 	];
 
 	if ($post['endpoint'] != 'tv') {
@@ -43,13 +47,19 @@
 		} 
 		//Kommando senden
 		$tcpsock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		socket_connect($tcpsock, $raspip, $raspport);
-		socket_write($tcpsock, $post['cmd'], strlen($post['cmd']));
+		$foo = socket_connect($tcpsock, $raspip, $raspport);
+		//socket_write($tcpsock, $post['cmd'], strlen($post['cmd']));
 		// ggf. mehrmals senden (z.B. f�r Lautst�rke)
+		
+		$writer = new Writer();
+		$writer->writeQString($post['cmd']);
+
+		$data = chr(0).chr(34).(string)$writer;
+
 		$count = 1;
-		if ($post['repeat'] > 1) $count = $post['repeat'];
+		if (isset($post['repeat']) && $post['repeat'] > 1) $count = $post['repeat'];
 		for ($i = 0; $i < $count; $i++) {
-			socket_write($tcpsock, $post['cmd'], strlen($post['cmd']));
+			$foo1 = socket_write($tcpsock, $data, strlen($data));
 		}
 		
 		//Antwort empfangen
@@ -58,5 +68,57 @@
 		echo $ret;
 		socket_shutdown($tcpsock, 2);
 		socket_close($tcpsock);
+	} else {
+		$rc = new RemoteControl('192.168.178.149');
+
+		try {
+			if (strpos ($post['cmd'], 'unmute') !== false) {
+				$rc->setMute(false);
+			} else if (strpos ($post['cmd'], 'mute') !== false) {
+				$rc->setMute(true);
+			} else if ((($volpos = strpos ($post['cmd'], 'vol+')) !== false) || (($volpos = strpos ($post['cmd'], 'vol-')) !== false)) {
+				$deltaVolume = substr($post['cmd'], $volpos + 3);
+				$volume = $rc->getVolume();
+				$newVolume = $volume + $deltaVolume;
+				if ($newVolume > 30) $newVolume = 30;
+				if ($newVolume < 0) $newVolume = 0;
+				$rc->setVolume($newVolume);				
+			} else if (($volpos = strpos ($post['cmd'], 'vol')) !== false) {
+				$newVolume = substr($post['cmd'], $volpos + 3);
+				if ($newVolume <= 30) {
+					$rc->setVolume($newVolume);
+				}
+			} else if (strpos ($post['cmd'], 'standby') !== false) {
+				$rc->sendKey(POWER);
+			} else if ((($chanpos = strpos ($post['cmd'], 'channel+')) !== false) || (($chanpos = strpos ($post['cmd'], 'channel-')) !== false)) {
+				$deltaChan = substr($post['cmd'], $chanpos + 7);
+				if ($deltaChan > 0) {
+					$key = CHANNEL_UP;
+				} else {
+					$key = CHANNEL_DOWN;
+				}
+				if (abs($deltaChan) > 20) $deltaChan = 20;
+				for ($i = 0; $i < abs($deltaChan); $i++) {
+					$rc->sendKey($key);
+				}
+			} else if (($chanpos = strpos ($post['cmd'], 'channel')) !== false) {
+				$newChan = substr($post['cmd'], $chanpos + 7);
+				if ($newChan > 99) {
+					$key = constant("NUM_".intval($newChan / 100));
+					$rc->sendKey($key);
+					$newChan = $newChan % 100;
+					if ($newChan < 10) $rc->sendKey("NUM_0");
+				} else if ($newChan > 9) {
+					$key = constant("NUM_".intval($newChan / 10));
+					$rc->sendKey($key);
+					$newChan = $newChan % 10;
+				}
+				$key = constant("NUM_".$newChan);
+				$rc->sendKey($key);
+			}
+		} catch(Exception $e) {
+			echo 'Exception abgefangen: ',  $e->getMessage(), "\n";
+		}
+	
 	}
 ?>

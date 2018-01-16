@@ -1,0 +1,25 @@
+{
+    "name": "clue/qdatastream",
+    "description": "Lightweight PHP library that allows exchanging binary data with Qt programs (QDataStream)",
+    "keywords": ["QDataStream", "Qt", "binary", "serialize", "parse"],
+    "homepage": "https://github.com/clue/php-qdatastream",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Lück",
+            "email": "christian@lueck.tv"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Clue\\QDataStream\\": "src/" }
+    },
+    "require": {
+        "php": ">=5.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.0 || ^4.8"
+    },
+    "suggest": {
+        "ext-mbstring": "Used for converting character encodings for QString and QChar"
+    }
+}

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "clue/qdatastream": "^0.7.1"
+    }
+}
