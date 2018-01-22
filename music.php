@@ -6,7 +6,7 @@
 	$post = $_POST;
 	$post = [
 		"endpoint" => "tv",
-		"cmd" => "set mute",
+		"cmd" => "set tv vol-2",
 		//"repeat" => "2",
 	];
 
